@@ -4,7 +4,7 @@ import { newProjectEntrypoint } from './cli/newProject';
 import { getError, getHelp } from './cli/information';
 
 function parseAndExecuteArguments(): void {
-    const args = process.argv;
+    const args = process.argv.slice(2);
 
     if (args.length === 0) {
         console.error(getError());
