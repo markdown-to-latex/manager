@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import * as ts from 'typescript';
 import { newProjectEntrypoint } from './cli/newProject';
 import { getError, getHelp } from './cli/information';
