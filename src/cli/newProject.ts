@@ -1,5 +1,5 @@
 import * as inquirer from 'inquirer';
-import { ChoiceCollection } from 'inquirer';
+import { CheckboxChoiceOptions } from 'inquirer';
 import * as path from 'path';
 import * as ts from 'typescript';
 import * as fs from 'fs';
@@ -9,7 +9,7 @@ import { camelToKebabCase, deleteFolderSyncRecursive } from './utils';
 import * as child_process from 'child_process';
 
 function getHelp() {
-    const spacer = '                                    ';
+    const spacer = '                        ';
     console.log(
         '\x1b[0mUsage: \x1b[35mmd-to-latex \x1b[1minit ' +
             '\x1b[0m[\x1b[34m--help\x1b[0m]\n' +
@@ -316,33 +316,35 @@ async function promptQuestions(): Promise<PromptAnswers> {
         }
     }
 
-    const answers: { features: FeatureKey[]; confirm: boolean } =
+    const features = [
+        {
+            key: FeatureKey.GithubConfigs,
+            name: 'GitHub configs',
+        },
+        {
+            key: FeatureKey.IdeaConfigs,
+            name: 'IDEA configs',
+            checked: true,
+        },
+        new inquirer.Separator(),
+        {
+            key: FeatureKey.MarkDownExamples,
+            name: 'Example MarkDown files',
+            checked: true,
+        },
+        {
+            key: FeatureKey.TypeScript,
+            name: 'Entrypoint for TypeScript code',
+        },
+    ] as CheckboxChoiceOptions & { name: string; key: FeatureKey }[];
+
+    const answers: { features: string[]; confirm: boolean } =
         await inquirer.prompt([
             {
                 type: 'checkbox',
                 message: 'Select features',
-                name: 'feature',
-                choices: [
-                    {
-                        key: FeatureKey.GithubConfigs,
-                        name: 'GitHub configs',
-                    },
-                    {
-                        key: FeatureKey.IdeaConfigs,
-                        name: 'IDEA configs',
-                        checked: true,
-                    },
-                    new inquirer.Separator(),
-                    {
-                        key: FeatureKey.MarkDownExamples,
-                        name: 'Example MarkDown files',
-                        checked: true,
-                    },
-                    {
-                        key: FeatureKey.TypeScript,
-                        name: 'Entrypoint for TypeScript code',
-                    },
-                ] as ChoiceCollection & { key: FeatureKey }[],
+                name: 'features',
+                choices: features,
             },
             {
                 type: 'confirm',
@@ -361,7 +363,12 @@ async function promptQuestions(): Promise<PromptAnswers> {
 
     return {
         projectName,
-        ...answers,
+        features: answers.features.map(
+            featureName =>
+                features.filter(
+                    (value: { name: string }) => value.name == featureName,
+                )[0].key,
+        ),
     };
 }
 
