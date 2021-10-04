@@ -1,16 +1,21 @@
-import {FeatureKey, newProject, ParsedOptions, PromptAnswers,} from '../../src/cli/newProject';
+import {
+    FeatureKey,
+    newProject,
+    ParsedOptions,
+    PromptAnswers,
+} from '../../src/cli/newProject';
 import * as fs from 'fs';
 import * as path from 'path';
-import {deleteFolderSyncRecursive} from "../../src/cli/utils";
+import { deleteFolderSyncRecursive } from '../../src/cli/utils';
 
 function projectPrepare(answers: PromptAnswers, options: ParsedOptions) {
     beforeAll(async () => {
         if (fs.existsSync(answers.projectName)) {
             deleteFolderSyncRecursive(answers.projectName);
-            console.log('Removed directory with test project')
+            console.log('Removed directory with test project');
         }
 
-        fs.mkdirSync('dist', {recursive: true});
+        fs.mkdirSync('dist', { recursive: true });
         await newProject(answers, options);
     });
 }
@@ -48,9 +53,7 @@ describe('newProject: default project', () => {
         }),
     );
 
-    [
-        '.idea-configs',
-    ].forEach(value =>
+    ['.idea-configs'].forEach(value =>
         test(`In project: file ${value} does not exists`, () => {
             expect(
                 fs.existsSync(path.join(answers.projectName, value)),
@@ -99,11 +102,7 @@ describe('newProject: no features', () => {
 
     projectPrepare(answers, options);
 
-    [
-        '.',
-        'package.json',
-        'scripts/tex-build.js',
-    ].forEach(value =>
+    ['.', 'package.json', 'scripts/tex-build.js'].forEach(value =>
         test(`In project: file ${value} exists`, () => {
             expect(
                 fs.existsSync(path.join(answers.projectName, value)),
@@ -111,18 +110,13 @@ describe('newProject: no features', () => {
         }),
     );
 
-    [
-        'src/md/main.md',
-        'src/ts',
-        '.idea-configs',
-        '.idea',
-        '.github',
-    ].forEach(value =>
-        test(`In project: file ${value} does not exists`, () => {
-            expect(
-                fs.existsSync(path.join(answers.projectName, value)),
-            ).not.toBeTruthy();
-        }),
+    ['src/md/main.md', 'src/ts', '.idea-configs', '.idea', '.github'].forEach(
+        value =>
+            test(`In project: file ${value} does not exists`, () => {
+                expect(
+                    fs.existsSync(path.join(answers.projectName, value)),
+                ).not.toBeTruthy();
+            }),
     );
 
     test('Main tex does not contain entrypoint', () => {
@@ -138,7 +132,7 @@ describe('newProject: no features', () => {
         const packageJsonContent = fs.readFileSync(
             path.join(answers.projectName, 'package.json'),
             'utf8',
-        )
+        );
 
         expect(packageJsonContent).toContain(answers.projectName);
         expect(packageJsonContent).not.toContain('"typescript"');

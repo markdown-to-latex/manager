@@ -1,5 +1,5 @@
 // See https://geedew.com/remove-a-directory-that-is-not-empty-in-nodejs/
-import * as fs from "fs";
+import * as fs from 'fs';
 
 export function deleteFolderSyncRecursive(path: string): void {
     if (fs.existsSync(path)) {

@@ -12,7 +12,7 @@ function parseAndExecuteArguments(): void {
             .then(() =>
                 console.log(
                     '\x1b[32mMarkDown To LaTeX feature ' +
-                    'has been set up successfully\x1b[0m',
+                        'has been set up successfully\x1b[0m',
                 ),
             )
             .catch(err => {
