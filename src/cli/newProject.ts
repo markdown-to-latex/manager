@@ -1,7 +1,7 @@
 import * as inquirer from 'inquirer';
 import { CheckboxChoiceOptions } from 'inquirer';
 import * as path from 'path';
-import * as ts from 'typescript';
+import ts from 'typescript';
 import * as fs from 'fs';
 import * as unzip from 'unzipper';
 import * as https from 'https';
