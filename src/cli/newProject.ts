@@ -1,7 +1,6 @@
 import * as inquirer from 'inquirer';
 import { CheckboxChoiceOptions } from 'inquirer';
 import * as path from 'path';
-import ts from 'typescript';
 import * as fs from 'fs';
 import * as unzip from 'unzipper';
 import * as https from 'https';
@@ -49,7 +48,7 @@ function parseOptions(args: string[]): ParsedOptions {
                     'Expected usage: \x1b[34m--branch \x1b[1;34mbranchName\x1b[0m\n' +
                         '    Use \x1b[34m--help \x1b[0mto get more information',
                 );
-                ts.sys.exit(1);
+                process.exit(1);
             }
 
             options.branch = args[i + 1];
@@ -61,7 +60,7 @@ function parseOptions(args: string[]): ParsedOptions {
             `Unexpected argument: ${arg}.\n` +
                 `Use \x1b[34m--help \x1b[0mto get available arguments`,
         );
-        ts.sys.exit(1);
+        process.exit(1);
     }
 
     return options;
@@ -122,7 +121,7 @@ export async function downloadBoilerplate(
                 error,
         );
         deleteFolderSyncRecursive(downloadDir);
-        ts.sys.exit(1);
+        process.exit(1);
     });
 
     console.log(
@@ -312,7 +311,7 @@ async function promptQuestions(): Promise<PromptAnswers> {
         ]);
 
         if (!confirm) {
-            ts.sys.exit(1);
+            process.exit(1);
         }
     }
 
@@ -358,7 +357,7 @@ async function promptQuestions(): Promise<PromptAnswers> {
         ]);
 
     if (!answers.confirm) {
-        ts.sys.exit(1);
+        process.exit(1);
     }
 
     return {
@@ -376,7 +375,7 @@ export async function newProjectEntrypoint(args: string[]) {
     const options = parseOptions(args);
     if (options.help) {
         getHelp();
-        ts.sys.exit(0);
+        process.exit(0);
     }
 
     const answers = await promptQuestions();
