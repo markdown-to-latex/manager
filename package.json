@@ -1,6 +1,6 @@
 {
     "name": "@md-to-latex/manager",
-    "version": "1.0.0-beta.4",
+    "version": "1.0.0",
     "description": "MarkDown To LaTeX Manager",
     "main": "dist/index.js",
     "scripts": {
