@@ -4,7 +4,12 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as unzip from 'unzipper';
 import * as https from 'https';
-import { camelToKebabCase, deleteFolderSyncRecursive } from './utils';
+import {
+    camelToKebabCase,
+    createGitRepository,
+    deleteFolderSyncRecursive,
+    getGitVersion,
+} from './utils';
 import * as child_process from 'child_process';
 
 function getHelp() {
@@ -226,7 +231,30 @@ const setFeatures: PostProcessFunction = function (answers, options) {
             'utf8',
         );
 
+        if (features.includes(FeatureKey.MarkDownExamples)) {
+            const mainMd = path.join(directory, 'src', 'md', 'main.md');
+            fs.writeFileSync(
+                mainMd,
+                fs
+                    .readFileSync(mainMd, 'utf8')
+                    .replace(/\$\$ \\showcaserandomnumber \$\$/gs, 'Nothing'),
+                'utf8',
+            );
+        }
+
         console.log(`\x1b[32m♦\x1b[0m Removed TypeScript entrypoint\x1b[0m`);
+    }
+
+    if (features.includes(FeatureKey.CreateGitRepository)) {
+        try {
+            getGitVersion();
+        } catch (ignored) {
+            console.log(
+                `\x1b[31m♦\x1b[0m Git not found. Cannot initialize repository\x1b[0m`,
+            );
+        }
+
+        createGitRepository(directory);
     }
 
     console.log(`\x1b[32m♦\x1b[0m Features setup complete\x1b[0m`);
@@ -282,6 +310,7 @@ export const enum FeatureKey {
     GithubConfigs = 'github-configs',
     MarkDownExamples = 'tex-examples',
     TypeScript = 'typescript',
+    CreateGitRepository = 'create-git-repository',
 }
 
 export interface PromptAnswers {
@@ -334,6 +363,11 @@ async function promptQuestions(): Promise<PromptAnswers> {
         {
             key: FeatureKey.TypeScript,
             name: 'Entrypoint for TypeScript code',
+        },
+        {
+            key: FeatureKey.CreateGitRepository,
+            name: 'Automatically create Git repository',
+            checked: true,
         },
     ] as CheckboxChoiceOptions & { name: string; key: FeatureKey }[];
 

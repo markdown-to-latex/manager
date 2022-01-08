@@ -27,6 +27,7 @@ describe('newProject: default project', () => {
             FeatureKey.TypeScript,
             FeatureKey.IdeaConfigs,
             FeatureKey.GithubConfigs,
+            FeatureKey.CreateGitRepository,
             FeatureKey.MarkDownExamples,
         ],
     };
@@ -40,6 +41,7 @@ describe('newProject: default project', () => {
 
     [
         '.',
+        '.git',
         'package.json',
         'src/md/main.md',
         'src/ts',
@@ -147,5 +149,63 @@ describe('newProject: no features', () => {
                 'utf8',
             ),
         ).not.toContain("require('../dist/js/random-number-generator.js')");
+    });
+});
+
+describe('newProject: +md -typescript', () => {
+    const answers: PromptAnswers = {
+        projectName: 'dist/with-md-no-ts',
+        features: [FeatureKey.MarkDownExamples],
+    };
+
+    const options: ParsedOptions = {
+        branch: 'develop',
+        help: false,
+    };
+
+    projectPrepare(answers, options);
+
+    ['.', 'package.json', 'scripts/tex-build.js', 'src/md/main.md'].forEach(
+        value =>
+            test(`In project: file ${value} exists`, () => {
+                expect(
+                    fs.existsSync(path.join(answers.projectName, value)),
+                ).toBeTruthy();
+            }),
+    );
+
+    ['.idea-configs', '.idea', '.github'].forEach(value =>
+        test(`In project: file ${value} does not exists`, () => {
+            expect(
+                fs.existsSync(path.join(answers.projectName, value)),
+            ).not.toBeTruthy();
+        }),
+    );
+
+    test('Main tex does not contain entrypoint', () => {
+        expect(
+            fs.readFileSync(
+                path.join(answers.projectName, 'src/tex/main.tex'),
+                'utf8',
+            ),
+        ).not.toContain('./dist/random-number.tex');
+    });
+
+    test('tex-generate.js does not contain entrypoint', () => {
+        expect(
+            fs.readFileSync(
+                path.join(answers.projectName, 'scripts/tex-generate.js'),
+                'utf8',
+            ),
+        ).not.toContain("require('../dist/js/random-number-generator.js')");
+    });
+
+    test('main.md does not contain ts latex command', () => {
+        expect(
+            fs.readFileSync(
+                path.join(answers.projectName, 'src/md/main.md'),
+                'utf8',
+            ),
+        ).not.toContain('\\showcaserandomnumber');
     });
 });
