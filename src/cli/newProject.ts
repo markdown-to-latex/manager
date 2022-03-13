@@ -158,7 +158,7 @@ const updatePackageJson: PostProcessFunction = function (answers, options) {
     );
 
     if (!answers.features.includes(FeatureKey.TypeScript)) {
-        text = text.replace(/(, *\n *)?"typescript": "[^"]+",?/g, '');
+        text = text.replace(/( *\n *)?"typescript": "[^"]+",?/g, '');
         text = text.replace(/"ts-build": "[^"]+",?/g, '');
         text = text.replace(/npm run ts-build && ?/g, '');
 
