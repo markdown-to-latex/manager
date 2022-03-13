@@ -26,14 +26,16 @@ describe('newProject: default project', () => {
         features: [
             FeatureKey.TypeScript,
             FeatureKey.IdeaConfigs,
-            FeatureKey.GithubConfigs,
+            FeatureKey.VsCodeConfigs,
+            FeatureKey.GithubCiConfigs,
+            FeatureKey.GitlabCiConfigs,
             FeatureKey.CreateGitRepository,
             FeatureKey.MarkDownExamples,
         ],
     };
 
     const options: ParsedOptions = {
-        branch: 'develop',
+        branch: 'master',
         help: false,
     };
 
@@ -47,6 +49,8 @@ describe('newProject: default project', () => {
         'src/ts',
         'scripts/tex-build.js',
         '.idea',
+        '.vscode',
+        '.gitlab-ci.yml',
     ].forEach(value =>
         test(`In project: file ${value} exists`, () => {
             expect(
@@ -98,7 +102,7 @@ describe('newProject: no features', () => {
     };
 
     const options: ParsedOptions = {
-        branch: 'develop',
+        branch: 'master',
         help: false,
     };
 
@@ -112,13 +116,21 @@ describe('newProject: no features', () => {
         }),
     );
 
-    ['src/md/main.md', 'src/ts', '.idea-configs', '.idea', '.github'].forEach(
-        value =>
-            test(`In project: file ${value} does not exists`, () => {
-                expect(
-                    fs.existsSync(path.join(answers.projectName, value)),
-                ).not.toBeTruthy();
-            }),
+    [
+        'src/md/main.md',
+        'src/ts',
+        '.idea-configs',
+        '.idea',
+        '.github',
+        '.vscode',
+        '.git',
+        '.gitlab-ci.yml',
+    ].forEach(value =>
+        test(`In project: file ${value} does not exists`, () => {
+            expect(
+                fs.existsSync(path.join(answers.projectName, value)),
+            ).not.toBeTruthy();
+        }),
     );
 
     test('Main tex does not contain entrypoint', () => {
@@ -159,7 +171,7 @@ describe('newProject: +md -typescript', () => {
     };
 
     const options: ParsedOptions = {
-        branch: 'develop',
+        branch: 'master',
         help: false,
     };
 

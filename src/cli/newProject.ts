@@ -179,10 +179,26 @@ const setFeatures: PostProcessFunction = function (answers, options) {
     const features = answers.features;
     const directory = answers.projectName;
 
-    if (!features.includes(FeatureKey.GithubConfigs)) {
+    if (!features.includes(FeatureKey.GithubCiConfigs)) {
         deleteFolderSyncRecursive(path.join(directory, '.github'));
 
-        console.log(`\x1b[32m♦\x1b[0m Removed VSCode feature\x1b[0m`);
+        console.log(
+            `\x1b[32m♦\x1b[0m Removed GitHub CI Configs feature\x1b[0m`,
+        );
+    }
+
+    if (!features.includes(FeatureKey.GitlabCiConfigs)) {
+        fs.unlinkSync(path.join(directory, '.gitlab-ci.yml'));
+
+        console.log(
+            `\x1b[32m♦\x1b[0m Removed GitLab CI Configs feature\x1b[0m`,
+        );
+    }
+
+    if (!features.includes(FeatureKey.VsCodeConfigs)) {
+        deleteFolderSyncRecursive(path.join(directory, '.vscode'));
+
+        console.log(`\x1b[32m♦\x1b[0m Removed VSCode Configs feature\x1b[0m`);
     }
 
     if (!features.includes(FeatureKey.IdeaConfigs)) {
@@ -306,8 +322,10 @@ export async function newProject(
 }
 
 export const enum FeatureKey {
+    VsCodeConfigs = 'vscode-configs',
     IdeaConfigs = 'idea-configs',
-    GithubConfigs = 'github-configs',
+    GithubCiConfigs = 'github-ci-configs',
+    GitlabCiConfigs = 'gitlab-ci-configs',
     MarkDownExamples = 'tex-examples',
     TypeScript = 'typescript',
     CreateGitRepository = 'create-git-repository',
@@ -346,12 +364,23 @@ async function promptQuestions(): Promise<PromptAnswers> {
 
     const features = [
         {
-            key: FeatureKey.GithubConfigs,
-            name: 'GitHub configs',
+            key: FeatureKey.VsCodeConfigs,
+            name: 'VSCode Configs',
+            checked: true,
         },
         {
             key: FeatureKey.IdeaConfigs,
-            name: 'IDEA configs',
+            name: 'IDEA Configs',
+            checked: false,
+        },
+        new inquirer.Separator(),
+        {
+            key: FeatureKey.GithubCiConfigs,
+            name: 'GitHub CI Configs',
+        },
+        {
+            key: FeatureKey.GitlabCiConfigs,
+            name: 'GitLab CI Configs',
             checked: true,
         },
         new inquirer.Separator(),
