@@ -71,4 +71,3 @@ class ExecSyncE {
         execSync(this.args.join(' '), this.options);
     }
 }
-
