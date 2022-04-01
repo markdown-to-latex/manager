@@ -1,6 +1,7 @@
 import * as chokidar from 'chokidar';
 import { FSWatcher } from 'chokidar';
-import { ChildProcess, execSync, spawn } from 'child_process';
+import { ChildProcess } from 'child_process';
+import { LatexBuilder } from '../builder';
 
 export enum WatcherKillType {
     Wait = 'Wait',
@@ -8,17 +9,21 @@ export enum WatcherKillType {
 }
 
 export interface WatcherContext {
-    executable: string;
-    executableArgs: string[];
+    times: number;
+    builder: LatexBuilder;
     killType: WatcherKillType;
     childProcess: ChildProcess | null;
+    postBuild: () => void;
+    preBuild: () => void;
 }
 
 const context: WatcherContext = {
-    executable: 'npm',
-    executableArgs: ['run', 'watcher-build'],
+    times: 1,
+    builder: LatexBuilder.fromPartialConfig({}),
     killType: WatcherKillType.Kill,
     childProcess: null,
+    postBuild: () => null,
+    preBuild: () => null,
 };
 
 export class WatcherBuildChoice {
@@ -57,15 +62,14 @@ export class WatcherBuildE implements WatcherAppliable {
     }
 
     public apply() {
-        console.log('> Started \x1b[32mbuild\x1b[0m');
+        this.context.preBuild();
+        console.log('> PreBuild \x1b[32mfinished\x1b[0m');
 
-        const childProcess = spawn(
-            this.context.executable,
-            this.context.executableArgs,
-            {
-                shell: true,
-            },
-        );
+        const childProcess = this.context.builder
+            .makeAsync()
+            .build()
+            .apply() as ChildProcess;
+        console.log('> Started \x1b[32mbuild\x1b[0m');
 
         const stdout = childProcess.stdout;
         const stderr = childProcess.stderr;
@@ -75,21 +79,25 @@ export class WatcherBuildE implements WatcherAppliable {
             return;
         }
 
-        stdout.on('data', function (chunk: Buffer) {
-            console.log(chunk.toString('utf-8'));
+        stdout.on('data', function (chunk: string) {
+            process.stdout.write(chunk);
         });
-        stderr.on('data', function (chunk: Buffer) {
-            console.log(chunk.toString('utf-8'));
+        stderr.on('data', function (chunk: string) {
+            process.stdout.write(chunk);
         });
 
         childProcess.on('exit', (code: string) => {
             console.log(code);
             console.log('> Build \x1b[32mfinished\x1b[0m');
 
+            this.context.postBuild();
+            console.log('> PostBuild \x1b[32mfinished\x1b[0m');
+
             this.context.childProcess = null;
         });
 
         this.context.childProcess = childProcess;
+        console.log('childProcess.pid', childProcess.pid);
     }
 }
 
@@ -100,21 +108,13 @@ export class WatcherKillerE implements WatcherAppliable {
         this.context = context;
     }
 
-    public static killLinux(cp: ChildProcess) {
-        cp.kill('SIGKILL');
-    }
-
-    public static killWindows(cp: ChildProcess) {
-        execSync(['taskkill', '/pid', cp.pid, '/f', '/t'].join(' '));
-    }
-
     public apply() {
         const childProcess = this.context.childProcess;
         if (childProcess && !childProcess.killed) {
             if (process.platform === 'win32') {
-                WatcherKillerE.killWindows(childProcess);
+                childProcess.kill('SIGTERM');
             } else {
-                WatcherKillerE.killLinux(childProcess);
+                childProcess.kill('SIGTERM');
             }
             return new WatcherBuildE(this.context).apply();
         }
@@ -150,15 +150,17 @@ export const listener: (path: string) => void = path => {
 };
 
 export interface WatcherConfig {
-    executable: string;
-    executableArgs: string[];
     killType: WatcherKillType;
+    builder: LatexBuilder;
+    postBuild: () => void;
+    preBuild: () => void;
 }
 
 export function createWatcher(config: Partial<WatcherConfig>): FSWatcher {
-    context.executable = config.executable ?? context.executable;
-    context.executableArgs = config.executableArgs ?? context.executableArgs;
     context.killType = config.killType ?? context.killType;
+    context.builder = config.builder ?? context.builder;
+    context.postBuild = config.postBuild ?? context.postBuild;
+    context.preBuild = config.preBuild ?? context.preBuild;
 
     console.log('> Watcher \x1b[32mstarted\x1b[0m');
 

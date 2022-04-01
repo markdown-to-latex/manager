@@ -1,5 +1,6 @@
 import { LatexBuilderConfig, LatexFlagsE } from './config';
-import { execSync, ExecSyncOptions } from 'child_process';
+import { ChildProcess, exec, execSync, ExecSyncOptions } from 'child_process';
+import * as fs from 'fs';
 
 export const defaultConfig: LatexBuilderConfig = {
     indexFile: 'index.tex',
@@ -19,8 +20,9 @@ export const defaultConfig: LatexBuilderConfig = {
 /**
  * @example LatexBuilder.fromPartialConfig({}).build().apply(times);
  */
-class LatexBuilder {
+export class LatexBuilder {
     public config: LatexBuilderConfig;
+    public isAsync: boolean = false;
 
     constructor(config: LatexBuilderConfig) {
         this.config = config;
@@ -42,8 +44,24 @@ class LatexBuilder {
         });
     }
 
-    public build(): ExecSyncE {
-        return new ExecSyncE(
+    public makeSync(): LatexBuilder {
+        this.isAsync = false;
+        return this;
+    }
+
+    public makeAsync(): LatexBuilder {
+        this.isAsync = true;
+        return this;
+    }
+
+    public build(): ExecAppliable {
+        if (this.config.flags.outputDirectory) {
+            fs.mkdirSync(this.config.flags.outputDirectory, {
+                recursive: true,
+            });
+        }
+
+        return new (this.isAsync ? ExecAsyncE : ExecSyncE)(
             [
                 this.config.executable,
                 ...this.flagsE.filterFlags(this.config.packet).args,
@@ -58,7 +76,11 @@ class LatexBuilder {
     }
 }
 
-class ExecSyncE {
+export interface ExecAppliable {
+    apply: (times?: number) => null | ChildProcess;
+}
+
+export abstract class AbstractExecE implements ExecAppliable {
     protected args: string[];
     protected options: ExecSyncOptions;
 
@@ -67,7 +89,25 @@ class ExecSyncE {
         this.options = options;
     }
 
-    public apply(times?: number): void {
-        execSync(this.args.join(' '), this.options);
+    abstract apply(times: number | undefined): null | ChildProcess;
+}
+
+export class ExecSyncE extends AbstractExecE {
+    public apply(times?: number): null {
+        for (let i = 0; i < (times ?? 1); i++) {
+            execSync(this.args.join(' '), this.options);
+        }
+
+        return null;
+    }
+}
+
+export class ExecAsyncE extends AbstractExecE {
+    public apply(times?: number): ChildProcess {
+        if (times != 1) {
+            console.warn('Async exec can be performed only 1 time');
+        }
+
+        return exec(this.args.join(' '), this.options);
     }
 }

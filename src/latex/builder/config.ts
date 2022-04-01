@@ -1,3 +1,5 @@
+import { camelToKebabCase } from '../../utils';
+
 export type LatexFlagParameterType = string | number | boolean | null;
 
 export interface LatexFlags extends Record<string, LatexFlagParameterType> {
@@ -36,16 +38,16 @@ export class LatexFlagsE {
         }
 
         if (typeof flag === 'string') {
-            return `-${key}=${flag}`;
+            return `-${camelToKebabCase(key)}=${flag}`;
         }
         if (typeof flag === 'number') {
-            return `-${key}=${flag}`;
+            return `-${camelToKebabCase(key)}=${flag}`;
         }
         if (typeof flag === 'boolean') {
-            return `-${key}=${flag ? 1 : 0}`;
+            return `-${camelToKebabCase(key)}=${flag ? 1 : 0}`;
         }
 
-        return `-${key}`;
+        return `-${camelToKebabCase(key)}`;
     }
 
     public filterFlags(packet: LatexPacketType): LatexFlagsE {
