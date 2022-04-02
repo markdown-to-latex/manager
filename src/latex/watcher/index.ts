@@ -87,11 +87,14 @@ export class WatcherBuildE implements WatcherAppliable {
         });
 
         childProcess.on('exit', (code: string) => {
-            console.log(code);
-            console.log('> Build \x1b[32mfinished\x1b[0m');
+            console.log(
+                `> Build \x1b[32mfinished\x1b[0m with code \x1b[34m${code}\x1b[0m`,
+            );
 
-            this.context.postBuild();
-            console.log('> PostBuild \x1b[32mfinished\x1b[0m');
+            if (+code === 0 && code !== null && code !== undefined) {
+                this.context.postBuild();
+                console.log('> PostBuild \x1b[32mfinished\x1b[0m');
+            }
 
             this.context.childProcess = null;
         });
@@ -111,14 +114,11 @@ export class WatcherKillerE implements WatcherAppliable {
     public apply() {
         const childProcess = this.context.childProcess;
         if (childProcess && !childProcess.killed) {
-            if (process.platform === 'win32') {
-                childProcess.kill('SIGTERM');
-            } else {
-                childProcess.kill('SIGTERM');
-            }
-            return new WatcherBuildE(this.context).apply();
+            childProcess.on('exit', (code: string) => {
+                return new WatcherBuildE(this.context).apply();
+            });
+            childProcess.kill('SIGINT');
         }
-        this.context.childProcess = null;
     }
 }
 

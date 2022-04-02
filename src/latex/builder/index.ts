@@ -1,5 +1,5 @@
 import { LatexBuilderConfig, LatexFlagsE } from './config';
-import { ChildProcess, exec, execSync, ExecSyncOptions } from 'child_process';
+import { ChildProcess, execSync, ExecSyncOptions, spawn } from 'child_process';
 import * as fs from 'fs';
 
 export const defaultConfig: LatexBuilderConfig = {
@@ -104,10 +104,20 @@ export class ExecSyncE extends AbstractExecE {
 
 export class ExecAsyncE extends AbstractExecE {
     public apply(times?: number): ChildProcess {
-        if (times != 1) {
+        if (times && times != 1) {
             console.warn('Async exec can be performed only 1 time');
         }
 
-        return exec(this.args.join(' '), this.options);
+        const options: ExecSyncOptions = { ...this.options };
+        delete options['stdio'];
+
+        const args: string[] = [
+            ...this.args[0].split(' '),
+            ...this.args.slice(1),
+        ];
+
+        return spawn(args[0], args.slice(0), {
+            ...options,
+        });
     }
 }
