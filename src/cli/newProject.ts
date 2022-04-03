@@ -223,7 +223,7 @@ const setFeatures: PostProcessFunction = function (answers, options) {
     if (!features.includes(FeatureKey.TypeScript)) {
         deleteFolderSyncRecursive(path.join(directory, 'src', 'ts'));
 
-        const texGenerate = path.join(directory, 'scripts', 'tex-generate.js');
+        const texGenerate = path.join(directory, 'scripts', 'tex-prebuild.js');
         fs.writeFileSync(
             texGenerate,
             fs

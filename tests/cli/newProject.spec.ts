@@ -85,10 +85,10 @@ describe('newProject: default project', () => {
         ).toContain(answers.projectName);
     });
 
-    test('tex-generate.js contains entrypoint', () => {
+    test('tex-prebuild.js contains entrypoint', () => {
         expect(
             fs.readFileSync(
-                path.join(answers.projectName, 'scripts/tex-generate.js'),
+                path.join(answers.projectName, 'scripts/tex-prebuild.js'),
                 'utf8',
             ),
         ).toContain("require('../dist/js/random-number-generator.js')");
@@ -154,10 +154,10 @@ describe('newProject: no features', () => {
         expect(packageJsonContent).not.toContain('npm run ts-build');
     });
 
-    test('tex-generate.js does not contain entrypoint', () => {
+    test('tex-prebuild.js does not contain entrypoint', () => {
         expect(
             fs.readFileSync(
-                path.join(answers.projectName, 'scripts/tex-generate.js'),
+                path.join(answers.projectName, 'scripts/tex-prebuild.js'),
                 'utf8',
             ),
         ).not.toContain("require('../dist/js/random-number-generator.js')");
@@ -203,10 +203,10 @@ describe('newProject: +md -typescript', () => {
         ).not.toContain('./dist/random-number.tex');
     });
 
-    test('tex-generate.js does not contain entrypoint', () => {
+    test('tex-prebuild.js does not contain entrypoint', () => {
         expect(
             fs.readFileSync(
-                path.join(answers.projectName, 'scripts/tex-generate.js'),
+                path.join(answers.projectName, 'scripts/tex-prebuild.js'),
                 'utf8',
             ),
         ).not.toContain("require('../dist/js/random-number-generator.js')");
