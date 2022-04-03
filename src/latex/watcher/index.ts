@@ -62,8 +62,14 @@ export class WatcherBuildE implements WatcherAppliable {
     }
 
     public apply() {
-        this.context.preBuild();
-        console.log('> PreBuild \x1b[32mfinished\x1b[0m');
+        try {
+            this.context.preBuild();
+            console.log('> PreBuild \x1b[32mfinished\x1b[0m');
+        } catch (e) {
+            console.error('Error occurred during preBuild script execution');
+            console.error(e);
+            return;
+        }
 
         const childProcess = this.context.builder
             .makeAsync()
@@ -92,8 +98,15 @@ export class WatcherBuildE implements WatcherAppliable {
             );
 
             if (+code === 0 && code !== null && code !== undefined) {
-                this.context.postBuild();
-                console.log('> PostBuild \x1b[32mfinished\x1b[0m');
+                try {
+                    this.context.postBuild();
+                    console.log('> PostBuild \x1b[32mfinished\x1b[0m');
+                } catch (e) {
+                    console.error(
+                        'Error occurred during postBuild script execution',
+                    );
+                    console.error(e);
+                }
             }
 
             this.context.childProcess = null;
