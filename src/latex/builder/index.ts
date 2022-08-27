@@ -12,7 +12,6 @@ export const defaultConfig: LatexBuilderConfig = {
         interaction: 'nonstopmode',
         shellEscape: null,
         haltOnError: null,
-        outputFormat: 'pdf',
         outputDirectory: './out',
     },
 };

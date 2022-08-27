@@ -28,9 +28,6 @@
         "url": "https://github.com/markdown-to-latex/manager/issues"
     },
     "homepage": "https://github.com/markdown-to-latex/manager#readme",
-    "bin": {
-        "md-to-latex": "./dist/cli.js"
-    },
     "files": [
         "dist/**/*"
     ],

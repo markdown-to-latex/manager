@@ -9,7 +9,6 @@ export interface LatexFlags extends Record<string, LatexFlagParameterType> {
     shellEscape: null;
     haltOnError: null;
     fileLineError: null;
-    outputFormat: string;
 
     [arg: string]: LatexFlagParameterType;
 }
@@ -54,7 +53,6 @@ export class LatexFlagsE {
         if (packet == 'miktex') {
             const newConfig = { ...this.flags };
             delete newConfig['fileLineError'];
-            delete newConfig['outputFormat'];
 
             return new LatexFlagsE(newConfig);
         }
